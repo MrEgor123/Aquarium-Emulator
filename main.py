@@ -1,14 +1,21 @@
 import sys
-from random import randint
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QSizePolicy, QFrame, QHBoxLayout, QWidget, QMessageBox, QVBoxLayout, QDialog
-from PyQt5.QtCore import Qt, QSize, QTimer
-from PyQt5.QtGui import QPixmap, QPainter
-from PyQt5 import QtGui
-from PyQt5.QtGui import QTransform, QBrush
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton,
+                             QGraphicsPixmapItem, QGraphicsScene,
+                             QGraphicsView, QFrame, QHBoxLayout, QWidget,
+                             QMessageBox, QVBoxLayout, QDialog)
+from PyQt5.QtCore import Qt, QTimer, QUrl, QObject, pyqtSignal
+from PyQt5.QtGui import QPixmap, QPainter, QFont, QTransform, QBrush, QColor
+from PyQt5.QtMultimedia import QSoundEffect
+from fish_descriptions import (
+    Okun_description, Shuka_description, Carp_description,
+    Vobla_description, Seld_description
+    )
 
 
 class MovingFish(QGraphicsPixmapItem):
-    def __init__(self, x, y, scene_width, scene_height, pixmap_path, fish_type, description, scale_factor=1):
+    musicClicked = pyqtSignal()
+    def __init__(self, x, y, scene_width, scene_height,
+                 pixmap_path, fish_type, description, scale_factor=1):
         super().__init__()
         self.direction_x = 1
         self.direction_y = 1
@@ -22,101 +29,115 @@ class MovingFish(QGraphicsPixmapItem):
         self.health = 100  # Изначальное здоровье рыбы
         self.hunger = 0  # Изначальный уровень голода рыбы
         self.description = description  # Описание рыбы
-        self.water_cleanliness = 100
-        self.aquarium_cleanliness = 100
+        self.water_cleanliness = 100  # Изначальная чистота ваоды в аквариуме
+        self.aquarium_cleanliness = 100  # Изначальная чистота аквариума
 
         pixmap = QPixmap(pixmap_path)
-        pixmap = pixmap.scaled(int(pixmap.width() * scale_factor), int(pixmap.height() * scale_factor))
+        pixmap = pixmap.scaled(int(pixmap.width() * scale_factor),
+                               int(pixmap.height() * scale_factor))
         self.setPixmap(pixmap)
         self.setPos(x, y)
-        self.setAcceptHoverEvents(True)  # Включаем обработку событий мыши для рыбы
+        # Включаем обработку событий мыши для рыбы
+        self.setAcceptHoverEvents(True)
 
-        # Создаем таймер для уменьшения здоровья и увеличения голода рыбы каждую минуту
+        # Создаем таймер для уменьшения здоровья
+        # и увеличения голода рыбы каждую минуту
         self.timer = QTimer()
         self.timer.timeout.connect(self.updateStatus)
-        self.timer.start(60000)  # Таймер срабатывает каждую минуту (60000 миллисекунд)
 
-    
+        # Таймер срабатывает каждую минуту (60000 миллисекунд)
+        self.timer.start(60000)
+
     def decreaseHealth(self):
         self.health -= 2
         if self.health < 0:
             self.health = 0
         print(f"{self.fish_type} здоровье: {self.health}%")
-        # После изменения здоровья обновляем метку на интерфейсе
+
+        # Обновление метки на интерфейсе, после изменения здоровья
         if self.scene() and self.scene().views():
             window = self.scene().views()[0].window()
             window.update_health_label()
-    
-    def updateStatus(self):
-        # Уменьшаем здоровье рыбы
+
+    def updateStatus(self):  # Уменьшение здоровья рыбам
         self.decreaseHealth()
 
-        # Увеличиваем уровень голода рыбы
-        self.hunger += 1
+        self.hunger += 1  # Увеличение голода рыбам
         if self.hunger > 100:
             self.hunger = 100
-
-        print(f"{self.fish_type} здоровье: {self.health}%, голод: {self.hunger}%")
-        # После изменения здоровья или голода обновляем метку на интерфейсе
+        print(
+            f"{self.fish_type} здоровье: {self.health}%, голод: {self.hunger}%"
+            )
+        # Обновление метки на интрерфейсе, после изменения голода и здоровья
         if self.scene() and self.scene().views():
             window = self.scene().views()[0].window()
             window.update_status_label()
 
-    def getHungerLevel(self):
+    def getHungerLevel(self):  # Голод рыб
         return self.hunger
-    
+
     def feedFish(self):
-        # Увеличиваем здоровье рыбы и сбрасываем уровень голода
-        self.health = min(100, self.health + 100)
-        self.hunger = 0
-        print(f"{self.fish_type.capitalize()} покормлено. Здоровье: {self.health}%, голод: {self.hunger}%")
+        self.health = min(100, self.health + 100)  # Увеличение здоровья рыбы
+        self.hunger = 0  # Сбрасывание уровня голода
+        print(
+            f"{self.fish_type.capitalize()} покормлено. "
+            f"Здоровье: {self.health}%, голод: {self.hunger}%"
+        )
         if self.fish_type == "carp":
             print(self.description)
 
     def mousePressEvent(self, event):
+        if self.pixmap().toImage() == QPixmap("/Users/mvideomvideo/Desktop/Python/music.gif").toImage():
+            self.musicClicked.emit()
+            return
         super().mousePressEvent(event)
         message_box = QMessageBox()
         message_box.setWindowTitle("Информация о рыбе")
+        font = QFont("Comic Sans MS", 16)
+        message_box.setFont(font)
         message_box.setText(f"Название: {self.fish_type.capitalize()}\n"
-                            f"Описание: {self.description}\n"
-                            f"Здоровье: {self.health}%\n"
-                            f"Уровень голода: {self.hunger}%")
+                        f"Описание: {self.description}\n"
+                        f"Здоровье: {self.health}%\n"
+                        f"Уровень голода: {self.hunger}%")
         message_box.exec_()
-
         self.direction = 1
+
 
     def updatePosition(self):
         current_x = self.x()
         current_y = self.y()
 
-        new_x = current_x + self.direction_x * 2.5  # Скорость движения по горизонтали = 5
-        new_y = current_y + self.direction_y * 2.5  # Скорость движения по вертикали = 5
-
-        # Проверяем, чтобы новые координаты находились в пределах окна
+        # Скорость движения по горизонтали
+        new_x = current_x + self.direction_x * 2.5
+        # Скорость движения по вертикали
+        new_y = current_y + self.direction_y * 2.5
+        # Проверка новых координат в пределах окна
         if 0 <= new_x <= self.scene_width - self.pixmap().width():
             self.setX(new_x)
         else:
-            # Если рыба достигла края окна по горизонтали, меняем направление движения по горизонтали
+            # Если рыба достигла края по горизонтали,
+            # меняем направление по горизонтали
             self.direction_x *= -1
-
         if 0 <= new_y <= self.scene_height - self.pixmap().height():
             self.setY(new_y)
         else:
-            # Если рыба достигла края окна по вертикали, меняем направление движения по вертикали
+            # Если рыба достигла края по вертикали,
+            # меняем направление по вертикали
             self.direction_y *= -1
 
-        # Обновляем координаты рыбы относительно верхнего левого угла окна
+        # Обновление координат рыбы, относительно верхнего левого угла
         self.setPos(self.mapToParent(0, 0))
 
     def resetTransform(self):
-        # Сбросить все преобразования
-        self.setTransform(QTransform())
+        self.setTransform(QTransform())  # Сброс всех преобразований
 
     def paint(self, painter, option, widget):
         # Перерисовать изображение с учетом измененного масштаба и поворота
-        painter.drawPixmap(0, 0, self.original_pixmap.scaled(self.pixmap().width(), self.pixmap().height()))
-
-
+        painter.drawPixmap(
+            0, 0, self.original_pixmap.scaled(
+                self.pixmap().width(), self.pixmap().height()
+                )
+            )
 
 
 class MyWindow(QMainWindow):
@@ -126,7 +147,7 @@ class MyWindow(QMainWindow):
         self.scene = QGraphicsScene(self)
         self.view = QGraphicsView(self.scene, self)
         self.setCentralWidget(self.view)
-        background_pixmap = QPixmap("/Users/mvideomvideo/Desktop/Python/main.gif").scaledToWidth(1600)
+        background_pixmap = QPixmap("/Users/mvideomvideo/Desktop/Python/main.gif").scaled(1600, 900)
         background_brush = QBrush(background_pixmap)
         self.scene.setBackgroundBrush(background_brush)
         self.view = QGraphicsView(self.scene, self)
@@ -137,17 +158,15 @@ class MyWindow(QMainWindow):
         self.view.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
         self.view.setFrameShape(QFrame.NoFrame)
 
-
-        
-        
         self.fishes = [
-            MovingFish(200, 200, 1600, 900, "/Users/mvideomvideo/Desktop/Python/fish1.gif", "Окунь", "Пресноводная рыба семейства окуневых. Обладает стройным телом с зеленовато-серой спиной и серебристыми боками. Является хищником и активным хищником. Распространен в пресноводных водоемах по всему миру. Популярна среди рыболовов благодаря своей борьбе при выуживании и отличным вкусовым качествам мяса."),
-            MovingFish(500, 300, 1600, 900, "/Users/mvideomvideo/Desktop/Python/fish2.gif", "Щука", "Пресноводная хищная рыба семейства щуковых. Имеет длинное тело и острые зубы. Обитает в реках, озерах и водохранилищах. Популярна среди рыбаков как объект спортивного и промыслового рыболовства."),
-            MovingFish(700, 500, 1600, 900, "/Users/mvideomvideo/Desktop/Python/fish3.gif", "Карп", "Пресноводная рыба семейства карповых. Обладает удлиненным телом, покрытым крупной чешуей. Часто разводится в прудах и водоемах. Важный объект промысла и аквакультуры."),
-            MovingFish(1100, 50, 1600, 900, "/Users/mvideomvideo/Desktop/Python/fish4.gif", "Вобла", "Пресноводная рыба семейства карповых. Имеет вытянутое тело и маленький размер. Обитает в реках, озерах и водохранилищах. Часто используется для приготовления закусок и пивных закусок."),
-            MovingFish(500, 50, 1600, 900, "/Users/mvideomvideo/Desktop/Python/fish5.gif", "Сельдь", "Морская рыба семейства сельдевых. Обладает удлиненным телом, покрытым мелкой чешуей. Является объектом коммерческого промысла. Известна своими большими стайными миграциями. Имеет высокую питательную ценность и широко используется в пищевой промышленности.")
+            MovingFish(200, 200, 1600, 900, "/Users/mvideomvideo/Desktop/Python/fish1.gif", "Окунь", Okun_description),
+            MovingFish(500, 300, 1600, 900, "/Users/mvideomvideo/Desktop/Python/fish2.gif", "Щука", Shuka_description),
+            MovingFish(700, 500, 1600, 900, "/Users/mvideomvideo/Desktop/Python/fish3.gif", "Карп", Carp_description),
+            MovingFish(1100, 50, 1600, 900, "/Users/mvideomvideo/Desktop/Python/fish4.gif", "Вобла", Vobla_description),
+            MovingFish(500, 50, 1600, 900, "/Users/mvideomvideo/Desktop/Python/fish5.gif", "Сельдь", Seld_description),
+            #MovingFish(1230, 500, 1600, 900, "/Users/mvideomvideo/Desktop/Python/music.gif", "Музыка", "Очень красиво!")
         ]
-
+        
         for fish in self.fishes:
             self.scene.addItem(fish)
         self.setupButtons()
@@ -178,9 +197,10 @@ class MyWindow(QMainWindow):
         self.water_change_timer.timeout.connect(self.decreaseWaterCleanliness)
         self.water_change_timer.start(60000)  # Таймер срабатывает каждую минуту (60000 миллисекунд)
 
+
     def update_health_label(self):
         total_health = sum(fish.health for fish in self.fishes)
-        self.health_label.setText(f"Общее здоровье рыбы: {total_health}%")
+        self.health_label.setText(f"")
     
         self.move_timer = QTimer()
         self.move_timer.timeout.connect(self.moveFishes)
@@ -188,7 +208,8 @@ class MyWindow(QMainWindow):
 
     def moveFishes(self):
         for fish in self.fishes:
-            fish.updatePosition()
+            if fish.pixmap().toImage() != QPixmap("/Users/mvideomvideo/Desktop/Python/music.gif").toImage():
+                fish.updatePosition()
 
     def decreaseCleanliness(self):
         for fish in self.fishes:
@@ -200,7 +221,7 @@ class MyWindow(QMainWindow):
 
     def update_water_cleanliness_label(self):
         total_water_cleanliness = sum(fish.water_cleanliness for fish in self.fishes) // len(self.fishes)
-        self.water_cleanliness_label.setText(f"Уровень чистоты воды: {total_water_cleanliness}%")
+        self.water_cleanliness_label.setText(f"")
 
     def decreaseWaterCleanliness(self):
         for fish in self.fishes:
@@ -208,7 +229,6 @@ class MyWindow(QMainWindow):
             if fish.water_cleanliness < 0:
                 fish.water_cleanliness = 0
         self.update_water_cleanliness_label()
-
 
     def feedFish(self):
         for fish in self.fishes:
@@ -219,14 +239,14 @@ class MyWindow(QMainWindow):
     def update_status_label(self):
         total_health = sum(fish.health for fish in self.fishes)
         total_hunger = sum(fish.getHungerLevel() for fish in self.fishes)
-        self.health_label.setText(f"Общее здоровье рыбы: {total_health}%, Общий уровень голода: {total_hunger}%")
+        self.health_label.setText(f"")
 
     def setupButtons(self):
         self.button1 = QPushButton("Правила", self)
         self.button2 = QPushButton("Накормить рыб", self)
         self.button3 = QPushButton("Почистить аквариум", self)
         self.rules_button = QPushButton("Сменить воду", self)
-        self.state_button = QPushButton("Состояние аквариума", self)  # Добавлена кнопка для состояния аквариума
+        self.state_button = QPushButton("Состояние аквариума", self)
         self.button1.clicked.connect(self.showRulesInfo)
         self.button2.clicked.connect(self.feedFish)  
         self.button3.clicked.connect(self.clearAquarium)
@@ -240,20 +260,22 @@ class MyWindow(QMainWindow):
         layout.addWidget(self.button2)
         layout.addWidget(self.button3)
         layout.addWidget(self.rules_button)
-        layout.addWidget(self.state_button)  # Добавлено соединение кнопки для состояния аквариума
-
+        layout.addWidget(self.state_button)
+        
         widget = QWidget()
         widget.setLayout(layout)
         self.setMenuWidget(widget)
 
-        button_height = 70
+        button_height = 90
         button_spacing = 20
         layout.setContentsMargins(0, 20, 0, 0)
         layout.setSpacing(button_spacing)
 
-        button_style = "background-color: #add9e6; color: black;"
-
-        button_style = "background-color: #add9e6; color: black;"
+        button_style = (
+            "background-color: #008CBA; color: white; border-radius: 24px;"
+        )
+        button_style = "background-color: #008CBA; color: white; border-radius: 10px; font-family: 'Comic Sans MS'; font-size: 18px;"
+        self.button1.setStyleSheet(button_style)
         self.button1.setStyleSheet(button_style)
         self.button2.setStyleSheet(button_style)
         self.button3.setStyleSheet(button_style)
@@ -304,25 +326,21 @@ class MyWindow(QMainWindow):
         self.update_water_cleanliness_label()
 
     def showRulesInfo(self):
+        with open('/Users/mvideomvideo/Desktop/Program/project/main/game_instructions.txt', 'r') as file:
+            game_instructions = file.read()
+
         message_box = QMessageBox()
         message_box.setWindowTitle("Правила")
-        message_box.setText("""Игра предоставляет пользователю два вида взаимодействия с аквариумом и его обитателями: наблюдение за состоянием аквариума, а также управление обитателями аквариума.
-                            
-Каждая рыба начинает игру со 100% здоровья и 0% голода. Здоровье рыбы уменьшается на 2% каждую минуту, а уровень голода увеличивается на 1% каждую минуту.
 
-Пользователь может взаимодействовать с рыбами, используя функцию «Накормить рыб». Это увеличит здоровье рыбы до 100% и снизит уровень голода до 0%.
-                            
-Состояние аквариума начинается со 100% чистоты и 100% качества воды. Чистота аквариума снижается на 1% каждые две минуты, а качество воды снижается на 1% каждую минуту. 
-                            
-Пользователь может управлять состоянием аквариума, используя функции «Почистить аквариум» и «Поменять воду», повышая чистоту и качество воды соответственно до 100%.
-                            
-При нажатии на рыбу, показывается краткая информация о ней, ее здоровье, а также состояние ее голода.
-                            
-В правом нижнем углу размещен блок, в котором хранится вся необходимая информация о текущем состоянии аквариума, чистоте в нем воды. 
-                            
-Игра является бесконечной, что означает отсутствие определенного конечного этапа или цели. Пользователь может продолжать играть и управлять аквариумом и его обитателями.
-""")
+    # Устанавливаем стиль шрифта для текста в QMessageBox
+        font = QFont("Comic Sans MS", 14)
+        message_box.setFont(font)
+
+        message_box.setText(game_instructions)
         message_box.exec_()
+
+
+
 
     def showClearLabel(self):
         self.hideCurrentLabel()
@@ -359,11 +377,13 @@ class MyWindow(QMainWindow):
         total_water_cleanliness = sum(fish.water_cleanliness for fish in self.fishes) // len(self.fishes)
         water_cleanliness_label = QLabel()
         water_cleanliness_label.setText(f"Уровень чистоты воды: {total_water_cleanliness}%")
+        water_cleanliness_label.setFont(QFont("Comic Sans MS", 16))
         layout.addWidget(water_cleanliness_label)
 
         # Добавляем метку для уровня чистоты аквариума
         total_cleanliness = sum(fish.aquarium_cleanliness for fish in self.fishes) // len(self.fishes)
         cleanliness_label = QLabel(f"Уровень чистоты аквариума: {total_cleanliness}%")
+        cleanliness_label.setFont(QFont("Comic Sans MS", 16))
         layout.addWidget(cleanliness_label)
 
         ok_button = QPushButton("OK", dialog)
@@ -376,10 +396,15 @@ class MyWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
+    
+    # Устанавливаем красивый шрифт
+    app.setFont(QFont("Arial", 12))  # Вы можете заменить "Arial" и 12 на любой другой шрифт и размер
+    
     window = MyWindow()
-    window.resize(1500, 900)
+    window.resize(1400, 900)
     window.show()
     sys.exit(app.exec_())
+
 
 if __name__ == "__main__":
     main()
