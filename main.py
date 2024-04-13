@@ -5,11 +5,6 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton,
                              QMessageBox, QVBoxLayout, QDialog)
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QPixmap, QPainter, QFont, QTransform, QBrush
-# from PyQt5.QtMultimedia import QSoundEffect
-from fish_descriptions import (
-    Okun_description, Shuka_description, Carp_description,
-    Vobla_description, Seld_description
-    )
 
 
 class MovingFish(QGraphicsPixmapItem):
@@ -160,6 +155,17 @@ class MyWindow(QMainWindow):
         self.view.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
         self.view.setFrameShape(QFrame.NoFrame)
 
+        with open("Okun_description.txt", "r") as file:
+            Okun_description = file.read()
+        with open("Shuka_description.txt", "r") as file:
+            Shuka_description = file.read()
+        with open("Carp_description.txt", "r") as file:
+            Carp_description = file.read()
+        with open("Vobla_description.txt", "r") as file:
+            Vobla_description = file.read()
+        with open("Seld_description.txt", "r") as file:
+            Seld_description = file.read()
+
         self.fishes = [
             MovingFish(
                 200, 200, 1600, 900,
@@ -186,11 +192,6 @@ class MyWindow(QMainWindow):
                 "/Users/mvideomvideo/Desktop/Python/fish5.gif",
                 "Сельдь",
                 Seld_description),
-            # MovingFish(
-            # 1230, 500, 1600, 900,
-            # "/Users/mvideomvideo/Desktop/Python/music.gif",
-            # "Музыка",
-            # "Очень красиво!")
         ]
 
         for fish in self.fishes:
