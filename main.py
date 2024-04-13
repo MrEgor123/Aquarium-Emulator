@@ -358,9 +358,8 @@ class MyWindow(QMainWindow):
 
     def showRulesInfo(self):
         with open(
-                '/Users/mvideomvideo/Desktop/Program/'
-                'project/main/game_instructions.txt',
-                'r') as file:
+            "/Users/mvideomvideo/Desktop/Python/game_instructions.txt",
+                "r") as file:
             game_instructions = file.read()
 
         message_box = QMessageBox()
