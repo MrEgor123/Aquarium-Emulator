@@ -155,15 +155,15 @@ class MyWindow(QMainWindow):
         self.view.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
         self.view.setFrameShape(QFrame.NoFrame)
 
-        with open("Okun_description.txt", "r") as file:
+        with open("/Users/mvideomvideo/Desktop/Python/Okun_description.txt", "r") as file:
             Okun_description = file.read()
-        with open("Shuka_description.txt", "r") as file:
+        with open("/Users/mvideomvideo/Desktop/Python/Shuka_description.txt", "r") as file:
             Shuka_description = file.read()
-        with open("Carp_description.txt", "r") as file:
+        with open("/Users/mvideomvideo/Desktop/Python/Carp_description.txt", "r") as file:
             Carp_description = file.read()
-        with open("Vobla_description.txt", "r") as file:
+        with open("/Users/mvideomvideo/Desktop/Python/Vobla_description.txt", "r") as file:
             Vobla_description = file.read()
-        with open("Seld_description.txt", "r") as file:
+        with open("/Users/mvideomvideo/Desktop/Python/Seld_description.txt", "r") as file:
             Seld_description = file.read()
 
         self.fishes = [
