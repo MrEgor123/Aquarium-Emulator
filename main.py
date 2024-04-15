@@ -6,6 +6,19 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton,
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QPixmap, QPainter, QFont, QTransform, QBrush
 
+TIMER_CLEAN_AQUARIUM = 120000
+TIMER_CLEAN_WATER = 60000
+TIMER_FISH_POSITION = 60000
+TIMER_UPDATE_HEALTH = 100
+FISH_HEALTH = 100
+WATER_CLEAN = 100
+AQUARIUM_CLEAN = 100
+FISH_HUNGER = 100
+FISH_BASE_HUNGER = 0
+FISH_SPEED = 2.5
+HEIGHT_BUTTON = 90
+SPACING_BUTTON = 20
+
 
 class MovingFish(QGraphicsPixmapItem):
     musicClicked = pyqtSignal()
@@ -22,11 +35,11 @@ class MovingFish(QGraphicsPixmapItem):
         self.scene_height = scene_height
         self.label_visible = False
         self.fish_type = fish_type
-        self.health = 100  # Изначальное здоровье рыбы
-        self.hunger = 0  # Изначальный уровень голода рыбы
+        self.health = FISH_HEALTH  # Изначальное здоровье рыбы
+        self.hunger = FISH_BASE_HUNGER  # Изначальный уровень голода рыбы
         self.description = description  # Описание рыбы
-        self.water_cleanliness = 100  # Изначальная чистота ваоды в аквариуме
-        self.aquarium_cleanliness = 100  # Изначальная чистота аквариума
+        self.water_cleanliness = WATER_CLEAN  # Изначальная чистота ваоды в аквариуме
+        self.aquarium_cleanliness = AQUARIUM_CLEAN  # Изначальная чистота аквариума
 
         pixmap = QPixmap(pixmap_path)
         pixmap = pixmap.scaled(int(pixmap.width() * scale_factor),
@@ -42,7 +55,7 @@ class MovingFish(QGraphicsPixmapItem):
         self.timer.timeout.connect(self.updateStatus)
 
         # Таймер срабатывает каждую минуту (60000 миллисекунд)
-        self.timer.start(60000)
+        self.timer.start(TIMER_FISH_POSITION)
 
     def decreaseHealth(self):
         self.health -= 2
@@ -59,8 +72,8 @@ class MovingFish(QGraphicsPixmapItem):
         self.decreaseHealth()
 
         self.hunger += 1  # Увеличение голода рыбам
-        if self.hunger > 100:
-            self.hunger = 100
+        if self.hunger > FISH_HUNGER:
+            self.hunger = FISH_HUNGER
         print(
             f"{self.fish_type} здоровье: {self.health}%, голод: {self.hunger}%"
             )
@@ -104,9 +117,9 @@ class MovingFish(QGraphicsPixmapItem):
         current_y = self.y()
 
         # Скорость движения по горизонтали
-        new_x = current_x + self.direction_x * 2.5
+        new_x = current_x + self.direction_x * FISH_SPEED
         # Скорость движения по вертикали
-        new_y = current_y + self.direction_y * 2.5
+        new_y = current_y + self.direction_y * FISH_SPEED
         # Проверка новых координат в пределах окна
         if 0 <= new_x <= self.scene_width - self.pixmap().width():
             self.setX(new_x)
@@ -145,7 +158,8 @@ class MyWindow(QMainWindow):
         self.scene.setSceneRect(0, 0, 1525, 915)  # Установка размеров сцены
         self.view = QGraphicsView(self.scene, self)
         self.setCentralWidget(self.view)
-        background_pixmap = QPixmap("/Users/mvideomvideo/Desktop/Python/main.gif")
+        background_pixmap = QPixmap(
+            "/Users/mvideomvideo/Desktop/Python/main.gif")
         background_brush = QBrush(background_pixmap)
         self.scene.setBackgroundBrush(background_brush)
         # Остальной код остается без изменений
@@ -231,17 +245,17 @@ class MyWindow(QMainWindow):
         self.cleanliness_timer = QTimer(self)
         self.cleanliness_timer.timeout.connect(self.decreaseCleanliness)
         # Таймер срабатывает каждые две минуты (120000 миллисекунд)
-        self.cleanliness_timer.start(120000)
+        self.cleanliness_timer.start(TIMER_CLEAN_AQUARIUM)
 
         self.water_change_timer = QTimer(self)
         self.water_change_timer.timeout.connect(self.decreaseWaterCleanliness)
         # Таймер срабатывает каждую минуту (60000 миллисекунд)
-        self.water_change_timer.start(60000)
+        self.water_change_timer.start(TIMER_CLEAN_WATER)
 
     def update_health_label(self):
         self.move_timer = QTimer()
         self.move_timer.timeout.connect(self.moveFishes)
-        self.move_timer.start(100)  # Обновление каждые 100 миллисекунд
+        self.move_timer.start(TIMER_UPDATE_HEALTH)  # Обновление каждые 100 миллисекунд
 
     def moveFishes(self):
         for fish in self.fishes:
@@ -301,8 +315,8 @@ class MyWindow(QMainWindow):
         widget.setLayout(layout)
         self.setMenuWidget(widget)
 
-        button_height = 90
-        button_spacing = 20
+        button_height = HEIGHT_BUTTON
+        button_spacing = SPACING_BUTTON
         layout.setContentsMargins(0, 20, 0, 0)
         layout.setSpacing(button_spacing)
 
@@ -340,12 +354,12 @@ class MyWindow(QMainWindow):
 
     def clearAquarium(self):
         for fish in self.fishes:
-            fish.aquarium_cleanliness = 100
+            fish.aquarium_cleanliness = AQUARIUM_CLEAN
         self.showAquariumState()
 
     def changeWater(self):
         for fish in self.fishes:
-            fish.water_cleanliness = 100
+            fish.water_cleanliness = WATER_CLEAN
         self.update_water_cleanliness_label()
         self.startWaterChange()
 
@@ -356,7 +370,7 @@ class MyWindow(QMainWindow):
         # При срабатывании таймера вызывается метод decreaseWaterCleanliness
         self.water_change_timer.timeout.connect(self.decreaseWaterCleanliness)
         # Таймер срабатывает каждую минуту (60000 миллисекунд)
-        self.water_change_timer.start(60000)
+        self.water_change_timer.start(TIMER_CLEAN_WATER)
 
     def showRulesInfo(self):
         with open(
@@ -384,11 +398,7 @@ class MyWindow(QMainWindow):
 
     def showWaterLabel(self):
         self.hideCurrentLabel()
-        new_label = QLabel("", self)
-        new_label.setGeometry(100, 150, 200, 50)
-        new_label.setStyleSheet("color: black;")
-        new_label.show()
-        self.current_label = new_label
+        self.current_label = None
 
     def hideCurrentLabel(self):
         if self.current_label:
