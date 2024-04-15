@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton,
                              QGraphicsPixmapItem, QGraphicsScene,
                              QGraphicsView, QFrame, QHBoxLayout, QWidget,
-                             QMessageBox, QVBoxLayout, QDialog)
+                             QVBoxLayout, QDialog)
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QPixmap, QPainter, QFont, QTransform, QBrush
 import os
@@ -95,7 +95,7 @@ class MovingFish(QGraphicsPixmapItem):
         )
         if self.fish_type == "carp":
             print(self.description)
-    
+
     def mousePressEvent(self, event):
         if self.pixmap().toImage() == QPixmap(
                 "assets/music.gif").toImage():
@@ -147,18 +147,24 @@ class MyWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         current_directory = os.path.dirname(os.path.abspath(__file__))
-        okun_description_path = os.path.join(current_directory, "assets", "Okun_description.txt")
-        shuka_description_path = os.path.join(current_directory, "assets", "Shuka_description.txt")
-        carp_description_path = os.path.join(current_directory, "assets", "Carp_description.txt")
-        vobla_description_path = os.path.join(current_directory, "assets", "Vobla_description.txt")
-        seld_description_path = os.path.join(current_directory, "assets", "Seld_description.txt")
+        okun_description_path = os.path.join(
+            current_directory, "assets", "Okun_description.txt")
+        shuka_description_path = os.path.join(
+            current_directory, "assets", "Shuka_description.txt")
+        carp_description_path = os.path.join(
+            current_directory, "assets", "Carp_description.txt")
+        vobla_description_path = os.path.join(
+            current_directory, "assets", "Vobla_description.txt")
+        seld_description_path = os.path.join(
+            current_directory, "assets", "Seld_description.txt")
         self.setWindowTitle("Эмулятор Аквариума")
         self.setFixedSize(1525, 950)  # Фиксированный размер окна
         self.scene = QGraphicsScene(self)
         self.scene.setSceneRect(0, 0, 1525, 899)  # Установка размеров сцены
         self.view = QGraphicsView(self.scene, self)
         self.setCentralWidget(self.view)
-        background_image_path = os.path.join(current_directory, "assets", "main.gif")
+        background_image_path = os.path.join(
+            current_directory, "assets", "main.gif")
         background_pixmap = QPixmap(background_image_path)
         background_brush = QBrush(background_pixmap)
         self.scene.setBackgroundBrush(background_brush)
@@ -171,7 +177,7 @@ class MyWindow(QMainWindow):
         self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.view.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
         self.view.setFrameShape(QFrame.NoFrame)
-        
+
         with open(okun_description_path, "r") as file:
             Okun_description = file.read()
         with open(shuka_description_path, "r") as file:
@@ -250,7 +256,8 @@ class MyWindow(QMainWindow):
 
     def showFishInfo(self, fish):
         dialog = QDialog(self)
-        dialog.setWindowTitle(f"Информация о рыбе - {fish.fish_type.capitalize()}")
+        dialog.setWindowTitle(
+            f"Информация о рыбе - {fish.fish_type.capitalize()}")
 
         fish_info = (
             f"<b>Тип рыбы:</b> {fish.fish_type.capitalize()}<br>"
@@ -271,7 +278,7 @@ class MyWindow(QMainWindow):
         layout.addWidget(ok_button)
 
         dialog.setLayout(layout)
-        dialog.setFixedWidth(dialog.sizeHint().width())  # Фиксируем ширину окна
+        dialog.setFixedWidth(dialog.sizeHint().width())
         dialog.exec_()
 
     def moveFishes(self):
@@ -387,10 +394,11 @@ class MyWindow(QMainWindow):
         self.water_change_timer.timeout.connect(self.decreaseWaterCleanliness)
         # Таймер срабатывает каждую минуту (60000 миллисекунд)
         self.water_change_timer.start(TIMER_CLEAN_WATER)
-    
+
     def showRulesInfo(self):
         current_directory = os.path.dirname(os.path.abspath(__file__))
-        instructions_file_path = os.path.join(current_directory, "assets", "game_instructions.txt")
+        instructions_file_path = os.path.join(
+            current_directory, "assets", "game_instructions.txt")
         with open(instructions_file_path, "r") as file:
             game_instructions = file.read()
 
@@ -450,7 +458,7 @@ class MyWindow(QMainWindow):
         water_cleanliness_label = QLabel()
         water_cleanliness_label.setText(
             f"Уровень чистоты воды: {total_water_cleanliness}%")
-        water_cleanliness_label.setFont(QFont("Lucida Grande", 16))
+        water_cleanliness_label.setFont(QFont(None, 14))
         layout.addWidget(water_cleanliness_label)
 
         # Добавляем метку для уровня чистоты аквариума
@@ -459,7 +467,7 @@ class MyWindow(QMainWindow):
                 self.fishes)
         cleanliness_label = QLabel(
             f"Уровень чистоты аквариума: {total_cleanliness}%")
-        cleanliness_label.setFont(QFont("Lucida Grande", 16))
+        cleanliness_label.setFont(QFont(None, 14))
         layout.addWidget(cleanliness_label)
 
         ok_button = QPushButton("OK", dialog)
