@@ -38,8 +38,8 @@ class MovingFish(QGraphicsPixmapItem):
         self.health = FISH_HEALTH  # Изначальное здоровье рыбы
         self.hunger = FISH_BASE_HUNGER  # Изначальный уровень голода рыбы
         self.description = description  # Описание рыбы
-        self.water_cleanliness = WATER_CLEAN  # Изначальная чистота ваоды в аквариуме
-        self.aquarium_cleanliness = AQUARIUM_CLEAN  # Изначальная чистота аквариума
+        self.water_cleanliness = WATER_CLEAN  # Чистота ваоды в аквариуме
+        self.aquarium_cleanliness = AQUARIUM_CLEAN  # Чистота аквариума
 
         pixmap = QPixmap(pixmap_path)
         pixmap = pixmap.scaled(int(pixmap.width() * scale_factor),
@@ -255,7 +255,7 @@ class MyWindow(QMainWindow):
     def update_health_label(self):
         self.move_timer = QTimer()
         self.move_timer.timeout.connect(self.moveFishes)
-        self.move_timer.start(TIMER_UPDATE_HEALTH)  # Обновление каждые 100 миллисекунд
+        self.move_timer.start(TIMER_UPDATE_HEALTH)
 
     def moveFishes(self):
         for fish in self.fishes:
