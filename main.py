@@ -140,13 +140,15 @@ class MyWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Эмулятор Аквариума")
+        self.setFixedSize(1525, 950)  # Фиксированный размер окна
         self.scene = QGraphicsScene(self)
+        self.scene.setSceneRect(0, 0, 1525, 915)  # Установка размеров сцены
         self.view = QGraphicsView(self.scene, self)
         self.setCentralWidget(self.view)
-        background_pixmap = QPixmap(
-            "/Users/mvideomvideo/Desktop/Python/main.gif").scaled(1600, 900)
+        background_pixmap = QPixmap("/Users/mvideomvideo/Desktop/Python/main.gif")
         background_brush = QBrush(background_pixmap)
         self.scene.setBackgroundBrush(background_brush)
+        # Остальной код остается без изменений
         self.view = QGraphicsView(self.scene, self)
         self.view.setRenderHint(QPainter.Antialiasing)
         self.view.setRenderHint(QPainter.SmoothPixmapTransform)
