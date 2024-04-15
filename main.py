@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton,
                              QMessageBox, QVBoxLayout, QDialog)
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QPixmap, QPainter, QFont, QTransform, QBrush
+import os
 
 TIMER_CLEAN_AQUARIUM = 120000
 TIMER_CLEAN_WATER = 60000
@@ -94,22 +95,15 @@ class MovingFish(QGraphicsPixmapItem):
         )
         if self.fish_type == "carp":
             print(self.description)
-
+    
     def mousePressEvent(self, event):
         if self.pixmap().toImage() == QPixmap(
-                "/Users/mvideomvideo/Desktop/Python/music.gif").toImage():
+                "assets/music.gif").toImage():
             self.musicClicked.emit()
             return
         super().mousePressEvent(event)
-        message_box = QMessageBox()
-        message_box.setWindowTitle("Информация о рыбе")
-        font = QFont("Lucida Grande", 16)
-        message_box.setFont(font)
-        message_box.setText(f"Название: {self.fish_type.capitalize()}\n"
-                            f"Описание: {self.description}\n"
-                            f"Здоровье: {self.health}%\n"
-                            f"Уровень голода: {self.hunger}%")
-        message_box.exec_()
+        window = self.scene().views()[0].window()
+        window.showFishInfo(self)
         self.direction = 1
 
     def updatePosition(self):
@@ -152,70 +146,67 @@ class MovingFish(QGraphicsPixmapItem):
 class MyWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+        okun_description_path = os.path.join(current_directory, "assets", "Okun_description.txt")
+        shuka_description_path = os.path.join(current_directory, "assets", "Shuka_description.txt")
+        carp_description_path = os.path.join(current_directory, "assets", "Carp_description.txt")
+        vobla_description_path = os.path.join(current_directory, "assets", "Vobla_description.txt")
+        seld_description_path = os.path.join(current_directory, "assets", "Seld_description.txt")
         self.setWindowTitle("Эмулятор Аквариума")
         self.setFixedSize(1525, 950)  # Фиксированный размер окна
         self.scene = QGraphicsScene(self)
-        self.scene.setSceneRect(0, 0, 1525, 915)  # Установка размеров сцены
+        self.scene.setSceneRect(0, 0, 1525, 899)  # Установка размеров сцены
         self.view = QGraphicsView(self.scene, self)
         self.setCentralWidget(self.view)
-        background_pixmap = QPixmap(
-            "/Users/mvideomvideo/Desktop/Python/main.gif")
+        background_image_path = os.path.join(current_directory, "assets", "main.gif")
+        background_pixmap = QPixmap(background_image_path)
         background_brush = QBrush(background_pixmap)
         self.scene.setBackgroundBrush(background_brush)
-        # Остальной код остается без изменений
+
         self.view = QGraphicsView(self.scene, self)
+        self.setCentralWidget(self.view)
         self.view.setRenderHint(QPainter.Antialiasing)
         self.view.setRenderHint(QPainter.SmoothPixmapTransform)
         self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.view.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
         self.view.setFrameShape(QFrame.NoFrame)
-
-        with open(
-            "/Users/mvideomvideo/Desktop/Python/Okun_description.txt",
-                "r") as file:
+        
+        with open(okun_description_path, "r") as file:
             Okun_description = file.read()
-        with open(
-            "/Users/mvideomvideo/Desktop/Python/Shuka_description.txt",
-                "r") as file:
+        with open(shuka_description_path, "r") as file:
             Shuka_description = file.read()
-        with open(
-            "/Users/mvideomvideo/Desktop/Python/Carp_description.txt",
-                "r") as file:
+        with open(carp_description_path, "r") as file:
             Carp_description = file.read()
-        with open(
-            "/Users/mvideomvideo/Desktop/Python/Vobla_description.txt",
-                "r") as file:
+        with open(vobla_description_path, "r") as file:
             Vobla_description = file.read()
-        with open(
-            "/Users/mvideomvideo/Desktop/Python/Seld_description.txt",
-                "r") as file:
+        with open(seld_description_path, "r") as file:
             Seld_description = file.read()
 
         self.fishes = [
             MovingFish(
                 200, 200, 1600, 900,
-                "/Users/mvideomvideo/Desktop/Python/fish1.gif",
+                os.path.join(current_directory, "assets", "fish1.gif"),
                 "Окунь",
                 Okun_description),
             MovingFish(
                 500, 300, 1600, 900,
-                "/Users/mvideomvideo/Desktop/Python/fish2.gif",
+                os.path.join(current_directory, "assets", "fish2.gif"),
                 "Щука",
                 Shuka_description),
             MovingFish(
                 700, 500, 1600, 900,
-                "/Users/mvideomvideo/Desktop/Python/fish3.gif",
+                os.path.join(current_directory, "assets", "fish3.gif"),
                 "Карп",
                 Carp_description),
             MovingFish(
                 1100, 50, 1600, 900,
-                "/Users/mvideomvideo/Desktop/Python/fish4.gif",
+                os.path.join(current_directory, "assets", "fish4.gif"),
                 "Вобла",
                 Vobla_description),
             MovingFish(
                 500, 50, 1600, 900,
-                "/Users/mvideomvideo/Desktop/Python/fish5.gif",
+                os.path.join(current_directory, "assets", "fish5.gif"),
                 "Сельдь",
                 Seld_description),
         ]
@@ -256,6 +247,32 @@ class MyWindow(QMainWindow):
         self.move_timer = QTimer()
         self.move_timer.timeout.connect(self.moveFishes)
         self.move_timer.start(TIMER_UPDATE_HEALTH)
+
+    def showFishInfo(self, fish):
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"Информация о рыбе - {fish.fish_type.capitalize()}")
+
+        fish_info = (
+            f"<b>Тип рыбы:</b> {fish.fish_type.capitalize()}<br>"
+            f"<b>Описание:</b> {fish.description}<br>"
+            f"<b>Здоровье:</b> {fish.health}%<br>"
+            f"<b>Голод:</b> {fish.hunger}%"
+        )
+
+        text_label = QLabel(fish_info)
+        text_label.setFont(QFont(None, 14))
+        text_label.setWordWrap(True)  # Включаем автоматический перенос слов
+
+        layout = QVBoxLayout()
+        layout.addWidget(text_label)
+
+        ok_button = QPushButton("OK")
+        ok_button.clicked.connect(dialog.close)
+        layout.addWidget(ok_button)
+
+        dialog.setLayout(layout)
+        dialog.setFixedWidth(dialog.sizeHint().width())  # Фиксируем ширину окна
+        dialog.exec_()
 
     def moveFishes(self):
         for fish in self.fishes:
@@ -326,7 +343,6 @@ class MyWindow(QMainWindow):
         button_style = (
             "background-color: #008CBA;"
             "color: white; border-radius: 10px;"
-            "font-family: 'Lucida Grande';"
             "font-size: 18px;")
         self.button1.setStyleSheet(button_style)
         self.button1.setStyleSheet(button_style)
@@ -371,22 +387,34 @@ class MyWindow(QMainWindow):
         self.water_change_timer.timeout.connect(self.decreaseWaterCleanliness)
         # Таймер срабатывает каждую минуту (60000 миллисекунд)
         self.water_change_timer.start(TIMER_CLEAN_WATER)
-
+    
     def showRulesInfo(self):
-        with open(
-            "/Users/mvideomvideo/Desktop/Python/game_instructions.txt",
-                "r") as file:
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+        instructions_file_path = os.path.join(current_directory, "assets", "game_instructions.txt")
+        with open(instructions_file_path, "r") as file:
             game_instructions = file.read()
 
-        message_box = QMessageBox()
-        message_box.setWindowTitle("Правила")
+        # Создаем сообщение
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Правила")
 
-    # Устанавливаем стиль шрифта для текста в QMessageBox
-        font = QFont("Lucida Grande", 14)
-        message_box.setFont(font)
+        # Устанавливаем стиль шрифта для текста в сообщении
+        font = QFont(None, 14)  # None для стандартного (не жирного) шрифта
 
-        message_box.setText(game_instructions)
-        message_box.exec_()
+        # Устанавливаем текст сообщения с переносом строк
+        text_label = QLabel(game_instructions.replace("\\n", "\n"))
+        text_label.setFont(font)
+        text_label.setWordWrap(True)  # Включаем автоматический перенос слов
+
+        layout = QVBoxLayout()
+        layout.addWidget(text_label)
+
+        ok_button = QPushButton("OK")
+        ok_button.clicked.connect(dialog.close)
+        layout.addWidget(ok_button)
+
+        dialog.setLayout(layout)
+        dialog.exec_()
 
     def showClearLabel(self):
         self.hideCurrentLabel()
