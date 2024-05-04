@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton,
                              QGraphicsPixmapItem, QGraphicsScene,
                              QGraphicsView, QFrame, QHBoxLayout, QWidget,
                              QVBoxLayout, QDialog)
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QPropertyAnimation, QRectF, QTimer, QPoint
 from PyQt5.QtGui import QPixmap, QPainter, QFont, QTransform, QBrush
 import os
 
@@ -146,6 +146,7 @@ class MovingFish(QGraphicsPixmapItem):
 class MyWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.current_directory = os.path.dirname(os.path.abspath(__file__))
         current_directory = os.path.dirname(os.path.abspath(__file__))
         okun_description_path = os.path.join(
             current_directory, "assets", "Okun_description.txt")
@@ -157,6 +158,8 @@ class MyWindow(QMainWindow):
             current_directory, "assets", "Vobla_description.txt")
         seld_description_path = os.path.join(
             current_directory, "assets", "Seld_description.txt")
+        food_gif_path = os.path.join(
+            current_directory, "assets", "food.gif")
         self.setWindowTitle("Эмулятор Аквариума")
         self.setFixedSize(1525, 950)  # Фиксированный размер окна
         self.scene = QGraphicsScene(self)
@@ -314,15 +317,60 @@ class MyWindow(QMainWindow):
     def update_status_label(self):
         return
 
+    def spawnFood(self):
+        # Путь к изображению еды
+        food_image_path = os.path.join(self.current_directory, "assets", "food.gif")
+
+        # Создаем объекты QGraphicsPixmapItem для изображения еды и устанавливаем их начальные позиции
+        start_positions = [(100, 0), (500, 200), (900, 0), (300, 400), (900, 400)]  # Примерные начальные координаты сверху
+        for start_pos in start_positions:
+            food_item = QGraphicsPixmapItem(QPixmap(food_image_path))
+            # Устанавливаем начальные позиции изображений еды на сцене
+            food_item.setPos(*start_pos)
+            # Добавляем изображение еды на сцену
+            self.scene.addItem(food_item)
+
+            # Создаем таймер для удаления корма через 5 секунд
+            QTimer.singleShot(5000, lambda item=food_item: self.removeFood(item))
+
+            # Создаем таймер для обновления позиции корма
+            timer = QTimer()
+            timer.timeout.connect(lambda item=food_item: self.updateFoodPosition(item))
+            timer.start(100)  # Устанавливаем интервал обновления позиции корма
+
+    def updateFoodPosition(self, food_item):
+        current_x = food_item.x()
+        current_y = food_item.y()
+
+        # Скорость движения корма
+        food_speed = 5
+
+        # Новые координаты корма с учетом скорости падения
+        new_y = current_y + food_speed
+
+        # Перемещаем корм по вертикали
+        food_item.setPos(current_x, new_y)
+
+        # Проверяем, достиг ли корм нижней границы сцены
+        if new_y >= self.scene.sceneRect().bottom():
+            # Если да, удаляем корм из сцены
+            self.scene.removeItem(food_item)
+
+    def removeFood(self, food_item):
+        self.scene.removeItem(food_item)
+
     def setupButtons(self):
         self.button1 = QPushButton("Правила", self)
         self.button2 = QPushButton("Накормить рыб", self)
+        self.button2.clicked.connect(self.spawnFood)
         self.button3 = QPushButton("Почистить аквариум", self)
         self.rules_button = QPushButton("Сменить воду", self)
         self.state_button = QPushButton("Состояние аквариума", self)
         self.button1.clicked.connect(self.showRulesInfo)
         self.button2.clicked.connect(self.feedFish)
         self.button3.clicked.connect(self.clearAquarium)
+        self.button2.clicked.connect(self.spawnFood)
+        self.button2.clicked.connect(self.feedFish)
         self.rules_button.clicked.connect(self.changeWater)
         self.state_button.clicked.connect(self.showAquariumState)
         self.rules_button.clicked.connect(self.changeWater)
