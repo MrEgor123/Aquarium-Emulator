@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton,
                              QGraphicsPixmapItem, QGraphicsScene,
                              QGraphicsView, QFrame, QHBoxLayout, QWidget,
                              QVBoxLayout, QDialog)
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QPropertyAnimation, QRectF, QTimer, QPoint
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QPixmap, QPainter, QFont, QTransform, QBrush
 import os
 
@@ -158,8 +158,6 @@ class MyWindow(QMainWindow):
             current_directory, "assets", "Vobla_description.txt")
         seld_description_path = os.path.join(
             current_directory, "assets", "Seld_description.txt")
-        food_gif_path = os.path.join(
-            current_directory, "assets", "food.gif")
         self.setWindowTitle("Эмулятор Аквариума")
         self.setFixedSize(1525, 950)  # Фиксированный размер окна
         self.scene = QGraphicsScene(self)
@@ -319,24 +317,20 @@ class MyWindow(QMainWindow):
 
     def spawnFood(self):
         # Путь к изображению еды
-        food_image_path = os.path.join(self.current_directory, "assets", "food.gif")
-
-        # Создаем объекты QGraphicsPixmapItem для изображения еды и устанавливаем их начальные позиции
-        start_positions = [(100, 0), (500, 200), (900, 0), (300, 400), (900, 400)]  # Примерные начальные координаты сверху
+        food_image_path = os.path.join(
+            self.current_directory, "assets", "food.gif")
+        start_positions = [
+            (100, 0), (500, 200), (900, 0), (300, 400), (900, 400)]
         for start_pos in start_positions:
             food_item = QGraphicsPixmapItem(QPixmap(food_image_path))
-            # Устанавливаем начальные позиции изображений еды на сцене
             food_item.setPos(*start_pos)
-            # Добавляем изображение еды на сцену
             self.scene.addItem(food_item)
-
-            # Создаем таймер для удаления корма через 5 секунд
-            QTimer.singleShot(5000, lambda item=food_item: self.removeFood(item))
-
-            # Создаем таймер для обновления позиции корма
+            QTimer.singleShot(
+                5000, lambda item=food_item: self.removeFood(item))
             timer = QTimer()
-            timer.timeout.connect(lambda item=food_item: self.updateFoodPosition(item))
-            timer.start(100)  # Устанавливаем интервал обновления позиции корма
+            timer.timeout.connect(
+                lambda item=food_item: self.updateFoodPosition(item))
+            timer.start(100)
 
     def updateFoodPosition(self, food_item):
         current_x = food_item.x()
