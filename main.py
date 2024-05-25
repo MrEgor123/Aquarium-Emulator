@@ -1,5 +1,4 @@
 import sys
-import random
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton,
                              QGraphicsPixmapItem, QGraphicsScene,
                              QGraphicsView, QFrame, QHBoxLayout, QWidget,
@@ -33,17 +32,21 @@ class FoodItem(QGraphicsPixmapItem):
         self.fall_timer.timeout.connect(self.fall)
         self.fall_timer.start(50)  # Падение обновляется каждые 50 миллисекунд
 
-
     def fall(self):
         current_pos = self.pos()
-        distance = 899 - current_pos.y()  # Расстояние до нижней границы сцены
-        speed = distance / (self.duration / 50)  # Скорость опускания в пикселях за миллисекунду
-        new_y = current_pos.y() + speed  # Новая позиция по оси Y
+        # Расстояние до нижней границы сцены
+        distance = 899 - current_pos.y()
+        # Скорость опускания в пикселях за миллисекунду
+        speed = distance / (self.duration / 50)
+        # Новая позиция по оси Y
+        new_y = current_pos.y() + speed
         self.setPos(current_pos.x(), new_y)
-        if new_y >= 899:  # Если достигли нижней границы сцены
-            self.fall_timer.stop()  # Останавливаем таймер
-            self.scene().removeItem(self)  # Удаляем корм
-
+        # Если достигли нижней границы сцены
+        if new_y >= 899:
+            # Останавливаем таймер
+            self.fall_timer.stop()
+            # Удаляем корм
+            self.scene().removeItem(self)
 
 
 class MovingFish(QGraphicsPixmapItem):
@@ -174,35 +177,39 @@ class MyWindow(QMainWindow):
         self.water_item = None
         self.food_items = []
         self.current_directory = os.path.dirname(os.path.abspath(__file__))
-        self.clean_image_path = os.path.join(self.current_directory, "assets", "clean.gif")
-
+        self.clean_image_path = os.path.join(
+            self.current_directory, "assets", "clean.gif")
         clean_pixmap = QPixmap(self.clean_image_path)
-        clean_pixmap = clean_pixmap.scaled(750, 750)  # Изменяем размеры изображения
+        # Изменяем размеры изображения
+        clean_pixmap = clean_pixmap.scaled(750, 750)
         self.clean_item = QGraphicsPixmapItem(clean_pixmap)
-        self.clean_item.setPos(350, 100)  # Устанавливаем положение изображения на сцене
+        # Устанавливаем положение изображения на сцене
+        self.clean_item.setPos(350, 100)
         self.clean_item.hide()
-
-        
-        
-        # Initialize scene before using it
         self.scene = QGraphicsScene(self)
         self.scene.addItem(self.clean_item)
-        
-        okun_description_path = os.path.join(self.current_directory, "assets", "Okun_description.txt")
-        shuka_description_path = os.path.join(self.current_directory, "assets", "Shuka_description.txt")
-        carp_description_path = os.path.join(self.current_directory, "assets", "Carp_description.txt")
-        vobla_description_path = os.path.join(self.current_directory, "assets", "Vobla_description.txt")
-        seld_description_path = os.path.join(self.current_directory, "assets", "Seld_description.txt")
-        
+
+        okun_description_path = os.path.join(
+            self.current_directory, "assets", "Okun_description.txt")
+        shuka_description_path = os.path.join(
+            self.current_directory, "assets", "Shuka_description.txt")
+        carp_description_path = os.path.join(
+            self.current_directory, "assets", "Carp_description.txt")
+        vobla_description_path = os.path.join(
+            self.current_directory, "assets", "Vobla_description.txt")
+        seld_description_path = os.path.join(
+            self.current_directory, "assets", "Seld_description.txt")
+
         self.setWindowTitle("Эмулятор Аквариума")
         self.setFixedSize(1525, 950)
         self.scene.setSceneRect(0, 0, 1525, 899)  # Set scene size
-        
+
         self.view = QGraphicsView(self.scene, self)
         self.setCentralWidget(self.view)
-        
-        background_image_path = os.path.join(self.current_directory, "assets", "main.gif")
-        background_pixmap = QPixmap(background_image_path)
+
+        self.background_image_path = os.path.join(
+            self.current_directory, "assets", "main.gif")
+        background_pixmap = QPixmap(self.background_image_path)
         background_brush = QBrush(background_pixmap)
         self.scene.setBackgroundBrush(background_brush)
 
@@ -214,8 +221,7 @@ class MyWindow(QMainWindow):
         self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.view.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
         self.view.setFrameShape(QFrame.NoFrame)
-
-        
+        self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         with open(okun_description_path, "r") as file:
             Okun_description = file.read()
@@ -351,7 +357,8 @@ class MyWindow(QMainWindow):
 
         # Добавляем пять изображений еды на сцену
         for x, y in zip(x_values, y_values):
-            food_image_path = os.path.join(self.current_directory, "assets", "food.gif")
+            food_image_path = os.path.join(
+                self.current_directory, "assets", "food.gif")
             food_pixmap = QPixmap(food_image_path)
             food_item = FoodItem(food_pixmap, duration=5000, x=x, y=y)
             self.scene.addItem(food_item)
@@ -379,7 +386,6 @@ class MyWindow(QMainWindow):
         self.rules_button.clicked.connect(self.changeWater)
         self.state_button.clicked.connect(self.showAquariumState)
         self.rules_button.clicked.connect(self.changeWater)
-        #self.rules_button.clicked.connect(self.showAquariumState)
 
         layout = QHBoxLayout()
         layout.addWidget(self.button1)
@@ -432,13 +438,12 @@ class MyWindow(QMainWindow):
         # Показываем изображение чистой воды
         self.clean_item.show()
 
-        # Создаем таймер для скрытия изображения чистой воды через некоторое время
+        # Создаем таймер для скрытия изображения чистой воды
         QTimer.singleShot(2000, self.hideCleanWater)
 
         # Теперь добавим код по очистке аквариума
         for fish in self.fishes:
             fish.aquarium_cleanliness = AQUARIUM_CLEAN
-        #self.showAquariumState()
         # Обновляем графический интерфейс
         QApplication.processEvents()
 
@@ -452,15 +457,21 @@ class MyWindow(QMainWindow):
             self.scene.removeItem(self.water_item)
 
         # Создаем новое изображение воды
-        water_image_path = os.path.join(self.current_directory, "assets", "water.gif")
+        water_image_path = os.path.join(
+            self.current_directory, "assets", "water.gif")
         water_pixmap = QPixmap(water_image_path)
         water_item = QGraphicsPixmapItem(water_pixmap)
-        water_item.setPos(0, 0)  # Устанавливаем начальные координаты в левый верхний угол
-        water_item.setZValue(-1)  # Помещаем изображение воды за все другие элементы на сцене
-        water_item.setTransformationMode(Qt.SmoothTransformation)  # Режим сглаживания для изображения
-        water_item.setPixmap(water_pixmap.scaled(self.width(), self.height()))  # Устанавливаем размеры изображения равными размерам окна
+        # Устанавливаем начальные координаты в левый верхний угол
+        water_item.setPos(0, 0)
+        # Помещаем изображение воды за все другие элементы на сцене
+        water_item.setZValue(-1)
+        # Режим сглаживания для изображения
+        water_item.setTransformationMode(Qt.SmoothTransformation)
+        # Устанавливаем размеры изображения равными размерам окна
+        water_item.setPixmap(water_pixmap.scaled(self.width(), self.height()))
         self.scene.addItem(water_item)
-        self.water_item = water_item  # Сохраняем ссылку на новое изображение воды
+        # Сохраняем ссылку на новое изображение воды
+        self.water_item = water_item
 
         # Увеличиваем уровень чистоты воды до 100%
         for fish in self.fishes:
@@ -566,7 +577,7 @@ def main():
     # Устанавливаем красивый шрифт
     app.setFont(QFont("Arial", 12))
     window = MyWindow()
-    window.resize(1400, 900)
+    window.resize(1720, 1080)
     window.show()
     sys.exit(app.exec_())
 
