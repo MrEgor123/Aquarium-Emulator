@@ -4,12 +4,12 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton,
                              QGraphicsView, QFrame, QHBoxLayout, QWidget,
                              QVBoxLayout, QDialog)
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
-from PyQt5.QtGui import QPixmap, QPainter, QFont, QTransform, QBrush
+from PyQt5.QtGui import QPixmap, QFont, QTransform, QBrush
 import os
 
-TIMER_CLEAN_AQUARIUM = 120000
-TIMER_CLEAN_WATER = 60000
-TIMER_FISH_POSITION = 60000
+TIMER_CLEAN_AQUARIUM = 120000  # Изменено! Изначально: 120000
+TIMER_CLEAN_WATER = 60000  # Изменено! Изначально: 60000
+TIMER_FISH_POSITION = 60000  # Изменено! Изначально: 60000
 TIMER_UPDATE_HEALTH = 16
 FISH_HEALTH = 100
 WATER_CLEAN = 100
@@ -90,23 +90,19 @@ class MovingFish(QGraphicsPixmapItem):
         self.health -= 2
         if self.health < 0:
             self.health = 0
-        print(f"{self.fish_type} здоровье: {self.health}%")
-
         # Обновление метки на интерфейсе, после изменения здоровья
         if self.scene() and self.scene().views():
             window = self.scene().views()[0].window()
             window.update_health_label()
 
-    def updateStatus(self):  # Уменьшение здоровья рыбам
+    def updateStatus(self):
         self.decreaseHealth()
 
-        self.hunger += 1  # Увеличение голода рыбам
+        self.hunger += 1
         if self.hunger > FISH_HUNGER:
             self.hunger = FISH_HUNGER
-        print(
-            f"{self.fish_type} здоровье: {self.health}%, голод: {self.hunger}%"
-            )
-        # Обновление метки на интрерфейсе, после изменения голода и здоровья
+
+        # Обновление метки на интерфейсе, после изменения голода и здоровья
         if self.scene() and self.scene().views():
             window = self.scene().views()[0].window()
             window.update_status_label()
@@ -117,18 +113,11 @@ class MovingFish(QGraphicsPixmapItem):
     def feedFish(self):
         self.health = min(100, self.health + 100)  # Увеличение здоровья рыбы
         self.hunger = 0  # Сбрасывание уровня голода
-        print(
-            f"{self.fish_type.capitalize()} покормлено. "
-            f"Здоровье: {self.health}%, голод: {self.hunger}%"
-        )
+
         if self.fish_type == "carp":
             print(self.description)
 
     def mousePressEvent(self, event):
-        if self.pixmap().toImage() == QPixmap(
-                "assets/music.gif").toImage():
-            self.musicClicked.emit()
-            return
         super().mousePressEvent(event)
         window = self.scene().views()[0].window()
         window.showFishInfo(self)
@@ -182,12 +171,12 @@ class MyWindow(QMainWindow):
         clean_pixmap = QPixmap(self.clean_image_path)
         # Изменяем размеры изображения
         clean_pixmap = clean_pixmap.scaled(750, 750)
-        self.clean_item = QGraphicsPixmapItem(clean_pixmap)
+        self.clean_water_image_item = QGraphicsPixmapItem(clean_pixmap)
         # Устанавливаем положение изображения на сцене
-        self.clean_item.setPos(350, 100)
-        self.clean_item.hide()
+        self.clean_water_image_item.setPos(350, 100)
+        self.clean_water_image_item.hide()
         self.scene = QGraphicsScene(self)
-        self.scene.addItem(self.clean_item)
+        self.scene.addItem(self.clean_water_image_item)
 
         okun_description_path = os.path.join(
             self.current_directory, "assets", "Okun_description.txt")
@@ -213,15 +202,16 @@ class MyWindow(QMainWindow):
         background_brush = QBrush(background_pixmap)
         self.scene.setBackgroundBrush(background_brush)
 
-        self.view = QGraphicsView(self.scene, self)
-        self.setCentralWidget(self.view)
-        self.view.setRenderHint(QPainter.Antialiasing)
-        self.view.setRenderHint(QPainter.SmoothPixmapTransform)
+        self.view.setScene(self.scene)
         self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.view.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
         self.view.setFrameShape(QFrame.NoFrame)
-        self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # Фиксируем сцену в верхнем левом углу
+        self.view.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        # Приводим размеры сцены к целым числам
+        self.view.setFixedSize(
+            int(self.scene.width()), int(self.scene.height()))
 
         with open(okun_description_path, "r") as file:
             Okun_description = file.read()
@@ -328,9 +318,7 @@ class MyWindow(QMainWindow):
 
     def moveFishes(self):
         for fish in self.fishes:
-            if fish.pixmap().toImage() != QPixmap(
-                    "/Users/mvideomvideo/Desktop/Python/music.gif").toImage():
-                fish.updatePosition()
+            fish.updatePosition()
 
     def decreaseCleanliness(self):
         for fish in self.fishes:
@@ -428,15 +416,11 @@ class MyWindow(QMainWindow):
 
     def showEatLabel(self):
         self.hideCurrentLabel()
-        new_label = QLabel("Накормить рыб", self)
-        new_label.setGeometry(100, 150, 200, 50)
-        new_label.setStyleSheet("color: black;")
-        new_label.show()
-        self.current_label = new_label
+        self.current_label = None
 
     def clearAquarium(self):
         # Показываем изображение чистой воды
-        self.clean_item.show()
+        self.clean_water_image_item.show()
 
         # Создаем таймер для скрытия изображения чистой воды
         QTimer.singleShot(2000, self.hideCleanWater)
@@ -449,7 +433,7 @@ class MyWindow(QMainWindow):
 
     def hideCleanWater(self):
         # Скрываем изображение чистой воды
-        self.clean_item.hide()
+        self.clean_water_image_item.hide()
 
     def changeWater(self):
         # Удаляем уже существующее изображение воды, если оно есть
@@ -520,11 +504,7 @@ class MyWindow(QMainWindow):
 
     def showClearLabel(self):
         self.hideCurrentLabel()
-        new_label = QLabel("Почистить аквариум", self)
-        new_label.setGeometry(100, 150, 200, 50)
-        new_label.setStyleSheet("color: black;")
-        new_label.show()
-        self.current_label = new_label
+        self.current_label = None
 
     def showWaterLabel(self):
         self.hideCurrentLabel()
@@ -554,7 +534,6 @@ class MyWindow(QMainWindow):
             f"Уровень чистоты воды: {total_water_cleanliness}%")
         water_cleanliness_label.setFont(QFont(None, 14))
         layout.addWidget(water_cleanliness_label)
-
         # Добавляем метку для уровня чистоты аквариума
         total_cleanliness = sum(
             fish.aquarium_cleanliness for fish in self.fishes) // len(
