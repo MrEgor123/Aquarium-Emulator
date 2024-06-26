@@ -148,7 +148,7 @@ class MyWindow(QMainWindow):
 
         # Создание сцены
         self.scene = QGraphicsScene(self)
-        self.scene.setSceneRect(0, 0, 1525, 800)
+        self.scene.setSceneRect(0, 0, 1525, 700)
 
         # Создание вида
         self.view = QGraphicsView(self.scene, self)
