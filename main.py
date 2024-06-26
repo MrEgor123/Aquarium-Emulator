@@ -3,9 +3,9 @@ import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton,
                              QGraphicsPixmapItem, QGraphicsScene,
                              QGraphicsView, QFrame, QHBoxLayout, QWidget,
-                             QVBoxLayout, QMessageBox, QDialog)
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QEvent, QRectF, QPropertyAnimation, QEasingCurve
-from PyQt5.QtGui import QPixmap, QFont, QTransform, QBrush, QColor, QPalette, QLinearGradient
+                             QVBoxLayout, QDialog)
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QEvent
+from PyQt5.QtGui import QPixmap, QFont, QTransform, QBrush, QColor, QPalette
 
 TIMER_CLEAN_AQUARIUM = 120000
 TIMER_CLEAN_WATER = 60000
@@ -187,15 +187,15 @@ class MyWindow(QMainWindow):
         seld_description_path = os.path.join(
             self.current_directory, "assets", "Seld_description.txt")
 
-        with open(okun_description_path, "r") as file:
+        with open(okun_description_path, "r", encoding="utf-8") as file:
             Okun_description = file.read()
-        with open(shuka_description_path, "r") as file:
+        with open(shuka_description_path, "r", encoding="utf-8") as file:
             Shuka_description = file.read()
-        with open(carp_description_path, "r") as file:
+        with open(carp_description_path, "r", encoding="utf-8") as file:
             Carp_description = file.read()
-        with open(vobla_description_path, "r") as file:
+        with open(vobla_description_path, "r", encoding="utf-8") as file:
             Vobla_description = file.read()
-        with open(seld_description_path, "r") as file:
+        with open(seld_description_path, "r", encoding="utf-8") as file:
             Seld_description = file.read()
 
         # Создание рыб
@@ -484,7 +484,7 @@ class MyWindow(QMainWindow):
         current_directory = os.path.dirname(os.path.abspath(__file__))
         instructions_file_path = os.path.join(
             current_directory, "assets", "game_instructions.txt")
-        with open(instructions_file_path, "r") as file:
+        with open(instructions_file_path, "r", encoding="utf-8") as file:
             game_instructions = file.read()
 
         dialog = QDialog(self)
