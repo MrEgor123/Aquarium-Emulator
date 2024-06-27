@@ -700,7 +700,7 @@ class MyWindow(QMainWindow):
         water_cleanliness_label.setFont(QFont(None, 14))
         layout.addWidget(water_cleanliness_label)
 
-        # Вычисляем средний уровень чистоты аквариума
+        # Вычисляем уровень чистоты аквариума
         total_cleanliness = sum(
             fish.aquarium_cleanliness for fish in self.fishes) // len(
                 self.fishes)
