@@ -616,7 +616,7 @@ class MyWindow(QMainWindow):
         current_directory = os.path.dirname(os.path.abspath(__file__))
         instructions_file_path = os.path.join(
             current_directory, "assets", "game_instructions.txt")
-        with open(instructions_file_path, "r") as file:
+        with open(instructions_file_path, "r", encoding="utf-8") as file:
             game_instructions = file.read()
 
         dialog = QDialog(self)
