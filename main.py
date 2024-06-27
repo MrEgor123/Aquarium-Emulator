@@ -494,7 +494,7 @@ class MyWindow(QMainWindow):
         self.button1 = QPushButton("Правила", self)
         self.button2 = QPushButton("Накормить рыб", self)
         self.button3 = QPushButton("Почистить аквариум", self)
-        self.rules_button = QPushButton("Сменить воду", self)
+        self.rules_button = QPushButton("Поменять воду", self)
         self.state_button = QPushButton("Состояние аквариума", self)
 
         self.button1.clicked.connect(self.showRulesInfo)
