@@ -487,7 +487,7 @@ class MyWindow(QMainWindow):
 
     def update_status_label(self):
         """Обновляет текстовое значение метки для статуса."""
-        return  # Пока не реализовано
+        return
 
     def setupButtons(self):
         """Создает кнопки и устанавливает их обработчики."""
