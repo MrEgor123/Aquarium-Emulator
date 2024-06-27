@@ -688,7 +688,7 @@ class MyWindow(QMainWindow):
 
         layout = QVBoxLayout()
 
-        # Вычисляем средний уровень чистоты воды
+        # Вычисляем уровень чистоты воды
         total_water_cleanliness = sum(
             fish.water_cleanliness for fish in self.fishes) // len(
                 self.fishes)
