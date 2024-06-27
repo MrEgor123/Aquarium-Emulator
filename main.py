@@ -280,7 +280,7 @@ class MyWindow(QMainWindow):
             self.current_directory, "assets", "Seld_description.txt")
 
         with open(okun_description_path, "r", encoding="utf-8") as file:
-            Okun_description = file.read()  # Читаем описание карася
+            Karas_description = file.read()  # Читаем описание карася
         with open(shuka_description_path, "r", encoding="utf-8") as file:
             Shuka_description = file.read()  # Читаем описание щуки
         with open(carp_description_path, "r", encoding="utf-8") as file:
@@ -296,7 +296,7 @@ class MyWindow(QMainWindow):
                 200, 200, 1600, 900,
                 os.path.join(self.current_directory, "assets", "fish1.gif"),
                 "Карась",
-                Okun_description),  # Создаем карася
+                Karas_description),  # Создаем карася
             MovingFish(
                 500, 300, 1600, 900,
                 os.path.join(self.current_directory, "assets", "fish2.gif"),
