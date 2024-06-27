@@ -448,7 +448,7 @@ class MyWindow(QMainWindow):
 
     def update_water_cleanliness_label(self):
         """Обновляет текстовое значение метки для чистоты воды."""
-        return  # Пока не реализовано
+        return
 
     def decreaseWaterCleanliness(self):
         """Уменьшает уровень чистоты воды для каждой рыбы."""
